@@ -1,0 +1,78 @@
+import java.io.*;
+import java.net.*;
+
+public class EchoServer {
+    public static void main(String[] args) {
+        int port = 12345;
+
+        try (ServerSocket serverSocket = new ServerSocket(port)) {
+            System.out.println("Echo Server is running on port " + port);
+
+            Socket socket = serverSocket.accept();
+            System.out.println("Client connected!");
+
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(socket.getInputStream()));
+            PrintWriter out = new PrintWriter(
+                    socket.getOutputStream(), true);
+
+            String message;
+            while ((message = in.readLine()) != null) {
+                System.out.println("Received: " + message);
+                out.println("Echo: " + message);
+
+                if (message.equalsIgnoreCase("bye")) {
+                    break;
+                }
+            }
+
+            socket.close();
+            System.out.println("Connection closed.");
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
+
+import java.io.*;
+import java.net.*;
+
+public class EchoClient {
+    public static void main(String[] args) {
+        String host = "localhost";
+        int port = 12345;
+
+        try (Socket socket = new Socket(host, port)) {
+
+            BufferedReader userInput = new BufferedReader(
+                    new InputStreamReader(System.in));
+
+            BufferedReader in = new BufferedReader(
+                    new InputStreamReader(socket.getInputStream()));
+
+            PrintWriter out = new PrintWriter(
+                    socket.getOutputStream(), true);
+
+            String message;
+
+            System.out.println("Connected to Echo Server.");
+            System.out.println("Type messages (type 'bye' to quit):");
+
+            while (true) {
+                message = userInput.readLine();
+                out.println(message);
+
+                String response = in.readLine();
+                System.out.println("Server: " + response);
+
+                if (message.equalsIgnoreCase("bye")) {
+                    break;
+                }
+            }
+
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
