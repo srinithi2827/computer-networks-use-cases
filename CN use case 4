@@ -1,0 +1,85 @@
+import java.net.*;
+import java.io.*;
+import java.util.HashMap;
+
+public class DNSServer {
+
+    public static void main(String[] args) throws Exception {
+
+        DatagramSocket serverSocket = new DatagramSocket(9876);
+        System.out.println("DNS Server is running on port 9876...");
+
+        // Simulated DNS table
+        HashMap<String, String> dnsTable = new HashMap<>();
+        dnsTable.put("google.com", "142.250.182.14");
+        dnsTable.put("yahoo.com", "98.137.11.163");
+        dnsTable.put("example.com", "93.184.216.34");
+
+        byte[] receiveData = new byte[1024];
+        byte[] sendData;
+
+        while (true) {
+            DatagramPacket receivePacket =
+                    new DatagramPacket(receiveData, receiveData.length);
+
+            serverSocket.receive(receivePacket);
+
+            String domain = new String(receivePacket.getData(), 0,
+                    receivePacket.getLength());
+
+            System.out.println("Client requested: " + domain);
+
+            String ip = dnsTable.getOrDefault(domain, "Domain not found");
+
+            sendData = ip.getBytes();
+
+            InetAddress clientAddress = receivePacket.getAddress();
+            int clientPort = receivePacket.getPort();
+
+            DatagramPacket sendPacket =
+                    new DatagramPacket(sendData, sendData.length,
+                            clientAddress, clientPort);
+
+            serverSocket.send(sendPacket);
+        }
+    }
+}
+
+import java.net.*;
+import java.io.*;
+
+public class DNSClient {
+
+    public static void main(String[] args) throws Exception {
+
+        DatagramSocket clientSocket = new DatagramSocket();
+        InetAddress serverAddress = InetAddress.getByName("localhost");
+
+        BufferedReader userInput =
+                new BufferedReader(new InputStreamReader(System.in));
+
+        System.out.print("Enter domain name: ");
+        String domain = userInput.readLine();
+
+        byte[] sendData = domain.getBytes();
+        byte[] receiveData = new byte[1024];
+
+        DatagramPacket sendPacket =
+                new DatagramPacket(sendData, sendData.length,
+                        serverAddress, 9876);
+
+        clientSocket.send(sendPacket);
+
+        DatagramPacket receivePacket =
+                new DatagramPacket(receiveData, receiveData.length);
+
+        clientSocket.receive(receivePacket);
+
+        String response = new String(receivePacket.getData(), 0,
+                receivePacket.getLength());
+
+        System.out.println("IP Address: " + response);
+
+        clientSocket.close();
+    }
+}
