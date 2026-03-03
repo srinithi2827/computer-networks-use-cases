@@ -1,0 +1,15 @@
+from scapy.all import IP, TCP, Raw
+
+def packet_handler(packet):
+  """A simple packet handler that prints packet details."""
+  print("\n--- Packet Received ---")
+  print(packet.show())
+  print("-----------------------")
+
+# Create a dummy IP packet with a TCP layer and some raw data
+dummy_packet = IP(dst="192.168.1.1") / TCP(dport=80, sport=12345) / Raw(load="Hello Scapy!")
+
+# Pass the dummy packet to the packet_handler function
+packet_handler(dummy_packet)
+
+print("\nDummy packet processed by packet_handler.")
